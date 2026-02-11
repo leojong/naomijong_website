@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naomi Jong</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero">
+        <nav>
+            <div class="nav-left">
+                <a href="/" class="nav-logo">Naomi Jong</a>
+            </div>
+            <div class="nav-links">
+                <div class="dropdown">
+                    <button class="dropdown-toggle">Projects</button>
+                    <div class="dropdown-menu">
+                        <a href="https://2cool2die.pythonanywhere.com" target="_blank">Credit Card Tracker</a>
+                    </div>
+                </div>
+                <a href="photos.html">Photos</a>
+                <a href="#">Contact</a>
+            </div>
+        </nav>
+
+        <section class="about">
+            <h1>About Me</h1>
+            <p>Welcome! I'm Naomi. This is my personal corner of the internet. More coming soon — stay tuned.</p>
+        </section>
+    </div>
+    <script>
+        document.querySelector('.dropdown-toggle').addEventListener('click', function () {
+            this.parentElement.classList.toggle('open');
+        });
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelector('.dropdown').classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>
