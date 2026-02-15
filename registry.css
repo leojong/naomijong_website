@@ -1,0 +1,345 @@
+/* Registry page — dark overlay matching gallery */
+.registry-page {
+    min-height: 100vh;
+    background: url('A6702555_DxO.jpg') center center / cover no-repeat fixed;
+    position: relative;
+}
+
+.registry-page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 0;
+}
+
+.registry-page > * {
+    position: relative;
+    z-index: 1;
+}
+
+.registry-page .nav-links a.active {
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    padding-bottom: 2px;
+}
+
+/* Container */
+.registry-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem 2rem 4rem;
+}
+
+.registry-title {
+    font-size: 1.8rem;
+    font-weight: 200;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Offline banner */
+.registry-banner {
+    background: rgba(255, 200, 50, 0.15);
+    border: 1px solid rgba(255, 200, 50, 0.3);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.85);
+    display: none;
+}
+
+.registry-banner.visible {
+    display: block;
+}
+
+/* Progress bar */
+.progress-wrap {
+    margin-bottom: 2.5rem;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.4s ease;
+}
+
+/* Category */
+.registry-category {
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.5s ease forwards;
+}
+
+.registry-category:nth-child(1) { animation-delay: 0.0s; }
+.registry-category:nth-child(2) { animation-delay: 0.08s; }
+.registry-category:nth-child(3) { animation-delay: 0.16s; }
+.registry-category:nth-child(4) { animation-delay: 0.24s; }
+.registry-category:nth-child(5) { animation-delay: 0.32s; }
+.registry-category:nth-child(6) { animation-delay: 0.40s; }
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.category-name {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 0.75rem;
+}
+
+/* Checklist items */
+.registry-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.registry-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.registry-item.claimed {
+    cursor: default;
+}
+
+.registry-item.claimed:hover {
+    background: transparent;
+}
+
+/* Checkbox */
+.item-check {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.registry-item.claimed .item-check {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.item-check-icon {
+    display: none;
+    font-size: 0.7rem;
+    color: #fff;
+    line-height: 1;
+}
+
+.registry-item.claimed .item-check-icon {
+    display: block;
+}
+
+/* Item name */
+.item-name {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.9);
+    transition: opacity 0.2s, text-decoration-color 0.2s;
+}
+
+.registry-item.claimed .item-name {
+    text-decoration: line-through;
+    text-decoration-color: rgba(255, 255, 255, 0.3);
+    opacity: 0.45;
+}
+
+/* Product link icon */
+.item-link {
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.25);
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.item-link:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Claimed-by label */
+.item-claimed-by {
+    margin-left: auto;
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.35);
+    white-space: nowrap;
+}
+
+/* Unclaim link */
+.item-unclaim {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.15);
+    transition: color 0.2s;
+    white-space: nowrap;
+}
+
+.item-unclaim:hover {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Modal ── */
+.claim-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+    align-items: center;
+    justify-content: center;
+}
+
+.claim-modal-overlay.active {
+    display: flex;
+}
+
+.claim-modal {
+    background: rgba(30, 30, 30, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 2rem 2.5rem;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.claim-modal h2 {
+    font-size: 1.1rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.claim-modal-item {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 1.5rem;
+}
+
+.claim-modal input {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    color: #fff;
+    font-family: 'Raleway', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 1rem;
+}
+
+.claim-modal input::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.claim-modal input:focus {
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.claim-modal-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.claim-modal-buttons button {
+    flex: 1;
+    padding: 0.55rem 0;
+    border-radius: 6px;
+    border: none;
+    font-family: 'Raleway', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-cancel {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.btn-claim {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.btn-claim:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+    .registry-container {
+        padding: 1rem 1rem 3rem;
+    }
+
+    .registry-item {
+        flex-wrap: wrap;
+        gap: 0.4rem 0.6rem;
+    }
+
+    .item-claimed-by {
+        margin-left: 0;
+        width: 100%;
+        padding-left: 2.1rem;
+    }
+}

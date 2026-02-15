@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baby Registry - Naomi Jong</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="registry.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="registry-page">
+    <nav>
+        <div class="nav-left">
+            <a href="/" class="nav-logo">Naomi Jong</a>
+        </div>
+        <div class="nav-links">
+            <div class="dropdown">
+                <button class="dropdown-toggle">Projects</button>
+                <div class="dropdown-menu">
+                    <a href="https://2cool2die.pythonanywhere.com" target="_blank">Credit Card Tracker</a>
+                </div>
+            </div>
+            <a href="photos.html">Photos</a>
+            <a href="registry.html" class="active">Baby Registry</a>
+            <a href="#">Contact</a>
+        </div>
+    </nav>
+
+    <main class="registry-container">
+        <h1 class="registry-title">Baby Registry</h1>
+
+        <div class="registry-banner" id="offlineBanner">
+            Firebase is unavailable — showing items in read-only mode.
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-text" id="progressText">0 of 0 items claimed</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div id="registryList"></div>
+    </main>
+
+    <!-- Claim modal -->
+    <div class="claim-modal-overlay" id="claimModal">
+        <div class="claim-modal">
+            <h2>Claim this item</h2>
+            <p class="claim-modal-item" id="claimModalItem"></p>
+            <input type="text" id="claimNameInput" placeholder="Your name" autocomplete="off">
+            <div class="claim-modal-buttons">
+                <button class="btn-cancel" id="claimCancel">Cancel</button>
+                <button class="btn-claim" id="claimConfirm">Claim</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── Dropdown toggle (shared with other pages) ──
+        document.querySelector('.dropdown-toggle').addEventListener('click', function () {
+            this.parentElement.classList.toggle('open');
+        });
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelector('.dropdown').classList.remove('open');
+            }
+        });
+    </script>
+
+    <!--
+        ══════════════════════════════════════════════════════
+        FIREBASE SETUP — Replace the config below with yours
+        ══════════════════════════════════════════════════════
+        1. Go to https://console.firebase.google.com
+        2. Create a new project (or use an existing one)
+        3. Add a Web app (Project Settings → General → Your apps → Add app → Web)
+        4. Copy the firebaseConfig object and paste it below
+        5. Enable Authentication → Sign-in method → Anonymous
+        6. Enable Realtime Database and set these rules:
+           {
+             "rules": {
+               "claims": {
+                 "$itemId": {
+                   ".read": true,
+                   ".write": "!data.exists() || data.child('uid').val() === auth.uid"
+                 }
+               }
+             }
+           }
+        ══════════════════════════════════════════════════════
+    -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjj7VUe5ibibzx0f11sfDwSMsDYGkw6fo",
+            authDomain: "babyreg-c3125.firebaseapp.com",
+            databaseURL: "https://babyreg-c3125-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "babyreg-c3125",
+            storageBucket: "babyreg-c3125.firebasestorage.app",
+            messagingSenderId: "187781381180",
+            appId: "1:187781381180:web:9a4466aea8dc966c179739",
+            measurementId: "G-LY4JM1PPFM"
+        };
+        // ═════════════════════════════════════
+
+        // ── Registry data ──
+        const CATEGORIES = [
+            {
+                name: 'Feeding',
+                items: [
+                    { id: 'feed-1', label: 'Stokke Tripp Trapp Chair — Natural', link: '' },
+                    { id: 'feed-2', label: 'Momcozy KleanPal Pro, 4-in-1 Baby Bottle Washer & Sterilizer', link: 'https://www.lazada.sg/products/momcozy-kleanpal-pro-baby-bottle-washer-sterilizer-dryer-all-in-one-cleaning-machine-for-bottles-pump-parts-baby-essentials-time-saving-effortless-care-i3563240365-s23524526133.html' }
+                ]
+            },
+            {
+                name: 'Nursery',
+                items: [
+                    { id: 'nurs-1', label: 'Nuna Sena Aire Travel Cot — Charcoal or Hazelwood', link: 'https://www.mothercare.com.sg/nuna-sena-aire-travel-cot-assorted-colours' }
+                ]
+            },
+            {
+                name: 'Bath',
+                items: [
+                    { id: 'bath-1', label: 'Stokke Flexi Bath (normal size) + Newborn Support — Sandy Beige', link: 'https://www.mothercare.com.sg/Stokke-Flexibath-Sandy-Beige-Tub-Free-Newborn-Support' }
+                ]
+            },
+            {
+                name: 'Gear & Travel',
+                items: [
+                    { id: 'gear-1', label: 'Nuna Pipa Urbn Carseat — Cedar', link: 'https://www.mothercare.com.sg/nuna-pipa-urbn-carseat-assorted-colours' }
+                ]
+            }
+        ];
+
+        // ── State ──
+        let db = null;
+        let currentUid = null;
+        let claimsRef = null;
+        let claims = {};          // { itemId: { name, uid } }
+        let pendingItemId = null;  // item being claimed in modal
+        let firebaseReady = false;
+
+        const allItems = CATEGORIES.flatMap(c => c.items);
+
+        // ── DOM refs ──
+        const registryList = document.getElementById('registryList');
+        const progressText = document.getElementById('progressText');
+        const progressFill = document.getElementById('progressFill');
+        const offlineBanner = document.getElementById('offlineBanner');
+        const claimModal = document.getElementById('claimModal');
+        const claimModalItem = document.getElementById('claimModalItem');
+        const claimNameInput = document.getElementById('claimNameInput');
+        const claimConfirm = document.getElementById('claimConfirm');
+        const claimCancel = document.getElementById('claimCancel');
+
+        // ── Build the DOM ──
+        function buildList() {
+            CATEGORIES.forEach(cat => {
+                const section = document.createElement('div');
+                section.className = 'registry-category';
+                section.innerHTML = `<div class="category-name">${cat.name}</div>`;
+
+                cat.items.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'registry-item';
+                    row.dataset.id = item.id;
+
+                    row.innerHTML =
+                        `<div class="item-check"><span class="item-check-icon">&#10003;</span></div>` +
+                        `<span class="item-name">${item.label}</span>` +
+                        (item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener" title="View product">&#128279;</a>` : '') +
+                        `<span class="item-claimed-by"></span>`;
+
+                    row.addEventListener('click', function (e) {
+                        if (e.target.closest('.item-link') || e.target.closest('.item-unclaim')) return;
+                        if (claims[item.id]) return; // already claimed
+                        if (!firebaseReady) return;
+                        openClaimModal(item.id, item.label);
+                    });
+
+                    section.appendChild(row);
+                });
+
+                registryList.appendChild(section);
+            });
+        }
+
+        // ── Update UI from claims state ──
+        function renderClaims() {
+            const total = allItems.length;
+            const claimed = Object.keys(claims).length;
+            progressText.textContent = `${claimed} of ${total} items claimed`;
+            progressFill.style.width = total ? `${(claimed / total) * 100}%` : '0%';
+
+            allItems.forEach(item => {
+                const row = registryList.querySelector(`[data-id="${item.id}"]`);
+                if (!row) return;
+                const info = claims[item.id];
+                const claimedByEl = row.querySelector('.item-claimed-by');
+
+                if (info) {
+                    row.classList.add('claimed');
+                    let html = `claimed by ${escapeHtml(info.name)}`;
+                    if (info.uid === currentUid) {
+                        html += ` <span class="item-unclaim" data-id="${item.id}">undo</span>`;
+                    }
+                    claimedByEl.innerHTML = html;
+
+                    // Bind unclaim
+                    const undo = claimedByEl.querySelector('.item-unclaim');
+                    if (undo) {
+                        undo.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            unclaim(item.id);
+                        });
+                    }
+                } else {
+                    row.classList.remove('claimed');
+                    claimedByEl.innerHTML = '';
+                }
+            });
+        }
+
+        function escapeHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        // ── Claim modal ──
+        function openClaimModal(itemId, label) {
+            pendingItemId = itemId;
+            claimModalItem.textContent = label;
+            const saved = localStorage.getItem('registry_name') || '';
+            claimNameInput.value = saved;
+            claimModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => claimNameInput.focus(), 50);
+        }
+
+        function closeClaimModal() {
+            claimModal.classList.remove('active');
+            document.body.style.overflow = '';
+            pendingItemId = null;
+        }
+
+        function confirmClaim() {
+            const name = claimNameInput.value.trim();
+            if (!name || !pendingItemId) return;
+            console.log('Claiming:', pendingItemId, 'as', name, 'uid:', currentUid);
+            localStorage.setItem('registry_name', name);
+            claimsRef.child(pendingItemId).set({ name: name, uid: currentUid })
+                .then(() => console.log('Claim written OK'))
+                .catch(err => console.error('Claim write error:', err));
+            closeClaimModal();
+        }
+
+        function unclaim(itemId) {
+            claimsRef.child(itemId).remove();
+        }
+
+        claimCancel.addEventListener('click', closeClaimModal);
+        claimConfirm.addEventListener('click', confirmClaim);
+        claimNameInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') confirmClaim();
+        });
+        claimModal.addEventListener('click', function (e) {
+            if (e.target === claimModal) closeClaimModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && claimModal.classList.contains('active')) closeClaimModal();
+        });
+
+        // ── Firebase init ──
+        function initFirebase() {
+            try {
+                // Skip if placeholder config
+                if (firebaseConfig.apiKey === 'YOUR_API_KEY') {
+                    throw new Error('Firebase not configured');
+                }
+
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                claimsRef = db.ref('claims');
+
+                firebase.auth().signInAnonymously().then(cred => {
+                    currentUid = cred.user.uid;
+                    firebaseReady = true;
+                    console.log('Firebase auth OK, uid:', currentUid);
+
+                    // Listen for real-time updates
+                    claimsRef.on('value', snap => {
+                        console.log('Claims update:', snap.val());
+                        claims = snap.val() || {};
+                        renderClaims();
+                    }, err => {
+                        console.error('Claims listener error:', err);
+                    });
+                }).catch(err => {
+                    console.error('Auth error:', err);
+                    showOffline();
+                });
+            } catch (e) {
+                showOffline();
+            }
+        }
+
+        function showOffline() {
+            offlineBanner.classList.add('visible');
+            renderClaims();
+        }
+
+        // ── Boot ──
+        buildList();
+        renderClaims();
+        initFirebase();
+    </script>
+</body>
+</html>
